@@ -2,7 +2,6 @@ import sqlite3
 
 class Database:
     def __init__(self, db_file):
-        # check_same_thread=False xatolikni oldini oladi
         self.connection = sqlite3.connect(db_file, check_same_thread=False)
         self.cursor = self.connection.cursor()
         self.create_table()
@@ -25,12 +24,15 @@ class Database:
         except sqlite3.IntegrityError:
             return False
 
-    # MANA SHU FUNKSIYA NOMI main.py DAGI BILAN BIR XIL BO'LISHI KERAK
     def get_movie(self, code):
         self.cursor.execute("SELECT * FROM movies WHERE code = ?", (code,))
         return self.cursor.fetchone()
 
     def get_all_movies(self):
-        # Barcha kinolarni ro'yxat ko'rinishida qaytaradi
         self.cursor.execute("SELECT code, name FROM movies")
         return self.cursor.fetchall()
+
+    def delete_movie(self, code):
+        with self.connection:
+            self.cursor.execute("DELETE FROM movies WHERE code = ?", (code,))
+            return self.cursor.rowcount > 0
