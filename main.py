@@ -7,7 +7,7 @@ from telebot.types import (
 from database import Database
 
 TOKEN = "8560396008:AAFsT1MCeJbxqwqxK2kI7nQdm7GdjjMfHos"
-ADMIN_ID = 8130553571
+ADMIN_ID = [8130553571,7754612381]
 
 bot = telebot.TeleBot(TOKEN)
 db = Database("kinolar.db")
