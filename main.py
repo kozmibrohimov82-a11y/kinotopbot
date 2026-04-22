@@ -76,7 +76,7 @@ def stats(message):
 # =======================
 @bot.message_handler(func=lambda m: m.text == "📢 Reklama" and m.from_user.id in ADMIN_ID)
 def broadcast_start(message):
-    msg = bot.send_message(message.chat.id, "📨 Xabar yuboring:", reply_markup=ForceReply())
+    msg = bot.send_message(message.chat.id, "📨 Reklama xabararni yuboring yuboring:", reply_markup=ForceReply())
     bot.register_next_step_handler(msg, send_broadcast)
 
 
@@ -135,7 +135,7 @@ def process_delete_channel(message):
         CHANNELS.remove(message.text)
         bot.send_message(message.chat.id, "✅ O‘chirildi", reply_markup=admin_buttons())
     else:
-        bot.send_message(message.chat.id, "❌ Yo‘q")
+        bot.send_message(message.chat.id, "❌ Kanal Yo‘q")
 
 
 # =======================
@@ -188,7 +188,7 @@ def add_movie(message):
 # =======================
 # 🗑 DELETE MOVIE
 # =======================
-@bot.message_handler(func=lambda m: m.text == "🗑 Kinoni o'chirish" and m.from_user.id == ADMIN_ID)
+@bot.message_handler(func=lambda m: m.text == "🗑 Kinoni o'chirish" and m.from_user.id in ADMIN_ID)
 def del_movie(message):
     msg = bot.send_message(message.chat.id, "Kod:", reply_markup=ForceReply())
     bot.register_next_step_handler(msg, process_delete)
