@@ -7,7 +7,7 @@ from telebot.types import (
 from database import Database
 
 TOKEN = "8560396008:AAFsT1MCeJbxqwqxK2kI7nQdm7GdjjMfHos"
-ADMIN_ID = [8130553571,7754612381]
+ADMIN_ID = list(map(int, [8130553571, 7754612381]))
 
 bot = telebot.TeleBot(TOKEN)
 db = Database("kinolar.db")
@@ -60,7 +60,7 @@ def start(message: Message):
 # =======================
 # 📊 STATISTIKA
 # =======================
-@bot.message_handler(func=lambda m: m.text == "📊 Statistika" and m.from_user.id == ADMIN_ID)
+@bot.message_handler(func=lambda m: m.text == "📊 Statistika" and m.from_user.id in ADMIN_ID)
 def stats(message):
     total = db.get_users_count()
     active = db.get_active_users(1440)
@@ -74,7 +74,7 @@ def stats(message):
 # =======================
 # 📢 REKLAMA (BROADCAST)
 # =======================
-@bot.message_handler(func=lambda m: m.text == "📢 Reklama" and m.from_user.id == ADMIN_ID)
+@bot.message_handler(func=lambda m: m.text == "📢 Reklama" and m.from_user.id in ADMIN_ID)
 def broadcast_start(message):
     msg = bot.send_message(message.chat.id, "📨 Xabar yuboring:", reply_markup=ForceReply())
     bot.register_next_step_handler(msg, send_broadcast)
@@ -97,7 +97,7 @@ def send_broadcast(message):
 # =======================
 # 📢 KANAL QO'SHISH
 # =======================
-@bot.message_handler(func=lambda m: m.text == "📢 Kanal qo'shish" and m.from_user.id == ADMIN_ID)
+@bot.message_handler(func=lambda m: m.text == "📢 Kanal qo'shish" and m.from_user.id in ADMIN_ID)
 def add_channel(message):
     msg = bot.send_message(message.chat.id, "📢 Kanal username:", reply_markup=ForceReply())
     bot.register_next_step_handler(msg, save_channel)
@@ -116,7 +116,7 @@ def save_channel(message):
 # =======================
 # 📋 KANALLAR
 # =======================
-@bot.message_handler(func=lambda m: m.text == "📋 Kanallar ro'yxati" and m.from_user.id == ADMIN_ID)
+@bot.message_handler(func=lambda m: m.text == "📋 Kanallar ro'yxati" and m.from_user.id in ADMIN_ID)
 def show_channels(message):
     bot.send_message(message.chat.id, "\n".join(CHANNELS) if CHANNELS else "❌ Yo‘q")
 
@@ -124,7 +124,7 @@ def show_channels(message):
 # =======================
 # ❌ DELETE CHANNEL
 # =======================
-@bot.message_handler(func=lambda m: m.text == "❌ Kanal o'chirish" and m.from_user.id == ADMIN_ID)
+@bot.message_handler(func=lambda m: m.text == "❌ Kanal o'chirish" and m.from_user.id in ADMIN_ID)
 def delete_channel(message):
     msg = bot.send_message(message.chat.id, "Kanal:", reply_markup=ForceReply())
     bot.register_next_step_handler(msg, process_delete_channel)
@@ -145,7 +145,7 @@ def process_delete_channel(message):
 def search(message):
     track_user(message)
 
-    if message.from_user.id == ADMIN_ID and message.text in [
+    if message.from_user.id in ADMIN_ID and message.text in [
         "🎬 Barcha kinolar","➕ Kino qo'shish","🗑 Kinoni o'chirish",
         "📢 Kanal qo'shish","📋 Kanallar ro'yxati","❌ Kanal o'chirish",
         "📊 Statistika","📢 Reklama"
@@ -157,7 +157,7 @@ def search(message):
     if movie:
         bot.send_video(message.chat.id, movie[2], caption=movie[1])
     else:
-        if message.from_user.id != ADMIN_ID:
+        if message.from_user.id not in ADMIN_ID:
             bot.reply_to(message, "❌ Topilmadi")
 
 
@@ -166,7 +166,7 @@ def search(message):
 # =======================
 @bot.message_handler(content_types=['video'])
 def add_movie(message):
-    if message.from_user.id != ADMIN_ID:
+    if message.from_user.id not in ADMIN_ID:
         return
 
     track_user(message)
