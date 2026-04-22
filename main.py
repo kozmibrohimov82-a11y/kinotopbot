@@ -1,19 +1,17 @@
 import telebot
 from telebot.types import (
     Message, ReplyKeyboardMarkup, KeyboardButton,
-    ReplyKeyboardRemove, ForceReply,
-    InlineKeyboardMarkup, InlineKeyboardButton
+    ReplyKeyboardRemove, ForceReply
 )
 from database import Database
 
-TOKEN = "8560396008:AAFsT1MCeJbxqwqxK2kI7nQdm7GdjjMfHos"
-ADMIN_ID = list(map(int, [8130553571, 7754612381]))
+TOKEN = "TOKENINGIZNI_BU_YERGA_QOYING"
+ADMIN_ID = [8130553571, 7754612381]
 
 bot = telebot.TeleBot(TOKEN)
 db = Database("kinolar.db")
 
 CHANNELS = []
-
 
 # =======================
 # 👤 USER TRACKER
@@ -25,24 +23,33 @@ def track_user(message):
     except:
         pass
 
-
 # =======================
 # 🔘 ADMIN PANEL
 # =======================
 def admin_buttons():
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(
-        KeyboardButton("🎬 Barcha kinolar"),
-        KeyboardButton("➕ Kino qo'shish"),
-        KeyboardButton("🗑 Kinoni o'chirish"),
-        KeyboardButton("📢 Kanal qo'shish"),
-        KeyboardButton("📋 Kanallar ro'yxati"),
-        KeyboardButton("❌ Kanal o'chirish"),
-        KeyboardButton("📊 Statistika"),
-        KeyboardButton("📢 Reklama")
+        "🎬 Barcha kinolar",
+        "➕ Kino qo'shish",
+        "🗑 Kinoni o'chirish",
+        "📢 Kanal qo'shish",
+        "📋 Kanallar ro'yxati",
+        "❌ Kanal o'chirish",
+        "📊 Statistika",
+        "📢 Reklama"
     )
     return markup
 
+ADMIN_COMMANDS = [
+    "🎬 Barcha kinolar",
+    "➕ Kino qo'shish",
+    "🗑 Kinoni o'chirish",
+    "📢 Kanal qo'shish",
+    "📋 Kanallar ro'yxati",
+    "❌ Kanal o'chirish",
+    "📊 Statistika",
+    "📢 Reklama"
+]
 
 # =======================
 # 📢 START
@@ -56,7 +63,6 @@ def start(message: Message):
     else:
         bot.send_message(message.chat.id, "🎬 Kino kodini yuboring", reply_markup=ReplyKeyboardRemove())
 
-
 # =======================
 # 📊 STATISTIKA
 # =======================
@@ -65,20 +71,15 @@ def stats(message):
     total = db.get_users_count()
     active = db.get_active_users(1440)
 
-    bot.send_message(
-        message.chat.id,
-        f"👥 Jami: {total}\n🔥 Aktiv (24h): {active}"
-    )
-
+    bot.send_message(message.chat.id, f"👥 Jami: {total}\n🔥 Aktiv (24h): {active}")
 
 # =======================
-# 📢 REKLAMA (BROADCAST)
+# 📢 REKLAMA
 # =======================
 @bot.message_handler(func=lambda m: m.text == "📢 Reklama" and m.from_user.id in ADMIN_ID)
 def broadcast_start(message):
-    msg = bot.send_message(message.chat.id, "📨 Reklama xabararni yuboring yuboring:", reply_markup=ForceReply())
+    msg = bot.send_message(message.chat.id, "📨 Xabar yuboring:", reply_markup=ForceReply())
     bot.register_next_step_handler(msg, send_broadcast)
-
 
 def send_broadcast(message):
     users = db.get_all_users()
@@ -93,73 +94,64 @@ def send_broadcast(message):
 
     bot.send_message(message.chat.id, f"✅ {ok}\n❌ {fail}", reply_markup=admin_buttons())
 
-
 # =======================
-# 📢 KANAL QO'SHISH
+# 📢 KANAL QO‘SHISH
 # =======================
 @bot.message_handler(func=lambda m: m.text == "📢 Kanal qo'shish" and m.from_user.id in ADMIN_ID)
 def add_channel(message):
     msg = bot.send_message(message.chat.id, "📢 Kanal username:", reply_markup=ForceReply())
     bot.register_next_step_handler(msg, save_channel)
 
-
 def save_channel(message):
     username = message.text.strip()
 
     if username in CHANNELS:
-        return bot.send_message(message.chat.id, "⚠️ Bor")
+        bot.send_message(message.chat.id, "⚠️ Bor")
+        return
 
     CHANNELS.append(username)
     bot.send_message(message.chat.id, f"✅ Qo‘shildi: {username}", reply_markup=admin_buttons())
-
 
 # =======================
 # 📋 KANALLAR
 # =======================
 @bot.message_handler(func=lambda m: m.text == "📋 Kanallar ro'yxati" and m.from_user.id in ADMIN_ID)
 def show_channels(message):
-    bot.send_message(message.chat.id, "\n".join(CHANNELS) if CHANNELS else "❌ Yo‘q")
-
+    if CHANNELS:
+        bot.send_message(message.chat.id, "\n".join(CHANNELS))
+    else:
+        bot.send_message(message.chat.id, "❌ Yo‘q")
 
 # =======================
 # ❌ DELETE CHANNEL
 # =======================
 @bot.message_handler(func=lambda m: m.text == "❌ Kanal o'chirish" and m.from_user.id in ADMIN_ID)
 def delete_channel(message):
-    msg = bot.send_message(message.chat.id, "Kanal:", reply_markup=ForceReply())
+    msg = bot.send_message(message.chat.id, "Kanal username:", reply_markup=ForceReply())
     bot.register_next_step_handler(msg, process_delete_channel)
 
-
 def process_delete_channel(message):
-    if message.text in CHANNELS:
-        CHANNELS.remove(message.text)
+    username = message.text.strip()
+
+    if username in CHANNELS:
+        CHANNELS.remove(username)
         bot.send_message(message.chat.id, "✅ O‘chirildi", reply_markup=admin_buttons())
     else:
-        bot.send_message(message.chat.id, "❌ Kanal Yo‘q")
-
+        bot.send_message(message.chat.id, "❌ Yo‘q")
 
 # =======================
-# 🔍 SEARCH FIXED
+# 🗑 DELETE MOVIE
 # =======================
-@bot.message_handler(content_types=['text'])
-def search(message):
-    track_user(message)
+@bot.message_handler(func=lambda m: m.text == "🗑 Kinoni o'chirish" and m.from_user.id in ADMIN_ID)
+def del_movie(message):
+    msg = bot.send_message(message.chat.id, "Kod:", reply_markup=ForceReply())
+    bot.register_next_step_handler(msg, process_delete)
 
-    if message.from_user.id in ADMIN_ID and message.text in [
-        "🎬 Barcha kinolar","➕ Kino qo'shish","🗑 Kinoni o'chirish",
-        "📢 Kanal qo'shish","📋 Kanallar ro'yxati","❌ Kanal o'chirish",
-        "📊 Statistika","📢 Reklama"
-    ]:
-        return
-
-    movie = db.get_movie(message.text.strip().lower())
-
-    if movie:
-        bot.send_video(message.chat.id, movie[2], caption=movie[1])
+def process_delete(message):
+    if db.delete_movie(message.text.strip().lower()):
+        bot.send_message(message.chat.id, "✅ O'chirildi", reply_markup=admin_buttons())
     else:
-        if message.from_user.id not in ADMIN_ID:
-            bot.reply_to(message, "❌ Topilmadi")
-
+        bot.send_message(message.chat.id, "❌ Yo'q")
 
 # =======================
 # 🎬 ADD MOVIE
@@ -168,8 +160,6 @@ def search(message):
 def add_movie(message):
     if message.from_user.id not in ADMIN_ID:
         return
-
-    track_user(message)
 
     if not message.caption:
         return
@@ -184,22 +174,23 @@ def add_movie(message):
     db.add_movie(code, name, message.video.file_id)
     bot.send_message(message.chat.id, "✅ Saqlandi", reply_markup=admin_buttons())
 
-
 # =======================
-# 🗑 DELETE MOVIE
+# 🔍 SEARCH
 # =======================
-@bot.message_handler(func=lambda m: m.text == "🗑 Kinoni o'chirish" and m.from_user.id in ADMIN_ID)
-def del_movie(message):
-    msg = bot.send_message(message.chat.id, "Kod:", reply_markup=ForceReply())
-    bot.register_next_step_handler(msg, process_delete)
+@bot.message_handler(content_types=['text'])
+def search(message):
+    track_user(message)
 
+    if message.from_user.id in ADMIN_ID and message.text in ADMIN_COMMANDS:
+        return
 
-def process_delete(message):
-    if db.delete_movie(message.text.strip().lower()):
-        bot.send_message(message.chat.id, "✅ O'chirildi", reply_markup=admin_buttons())
+    movie = db.get_movie(message.text.strip().lower())
+
+    if movie:
+        bot.send_video(message.chat.id, movie[2], caption=movie[1])
     else:
-        bot.send_message(message.chat.id, "❌ Yo'q")
-
+        if message.from_user.id not in ADMIN_ID:
+            bot.reply_to(message, "❌ Topilmadi")
 
 # =======================
 # ▶️ RUN
