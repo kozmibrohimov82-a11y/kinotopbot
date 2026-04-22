@@ -5,7 +5,7 @@ from telebot.types import (
 )
 from database import Database
 
-TOKEN = "TOKENINGIZNI_BU_YERGA_QOYING"
+TOKEN = "8560396008:AAFsT1MCeJbxqwqxK2kI7nQdm7GdjjMfHos"
 ADMIN_ID = [8130553571, 7754612381]
 
 bot = telebot.TeleBot(TOKEN)
