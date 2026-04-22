@@ -51,7 +51,7 @@ def admin_buttons():
 def start(message: Message):
     track_user(message)
 
-    if message.from_user.id == ADMIN_ID:
+    if message.from_user.id in ADMIN_ID:
         bot.send_message(message.chat.id, "👋 Admin panel", reply_markup=admin_buttons())
     else:
         bot.send_message(message.chat.id, "🎬 Kino kodini yuboring", reply_markup=ReplyKeyboardRemove())
