@@ -140,16 +140,17 @@ def process_delete(message):
 # =======================
 @bot.message_handler(func=lambda m: m.text == "➕ Kino qo'shish" and m.from_user.id in ADMIN_ID)
 def ask_movie(message):
+    user_state[message.from_user.id] = "waiting_movie"
 
     bot.send_message(
         message.chat.id,
         "🎬 Salom!\n\n"
         "📥 Kino videosini yuboring va captionga yozing:\n"
         "👉 kod nomi\n\n"
-        "Misol: kino1 Titanic"
+        "Misol: 1 Titanic"
     )
 
-@bot.message_handler(content_types=['video'])
+@bot.message_handler(content_types=['video', 'document', 'audio', 'photo', 'text'])
 def add_movie(message):
     user_id = message.from_user.id
 
@@ -159,14 +160,30 @@ def add_movie(message):
     if user_state.get(user_id) != "waiting_movie":
         return
 
+    # ❌ VIDEO EMAS BO'LSA
+    if not message.content_type == "video":
+        bot.send_message(
+            message.chat.id,
+            "❌ Noto‘g‘ri format!\n\n"
+            "📥 Faqat VIDEO yuboring."
+        )
+        return
+
+    # ❌ CAPTION YO'Q BO'LSA
     if not message.caption:
-        bot.send_message(message.chat.id, "❌ Caption yozing: kod nomi")
+        bot.send_message(
+            message.chat.id,
+            "❌ Caption yozing!\nFormat: kod nomi"
+        )
         return
 
     parts = message.caption.split(" ", 1)
 
     if len(parts) < 2:
-        bot.send_message(message.chat.id, "❌ Format: kod nomi")
+        bot.send_message(
+            message.chat.id,
+            "❌ Format noto‘g‘ri!\nTo‘g‘ri format: kod nomi"
+        )
         return
 
     code = parts[0].lower()
@@ -181,7 +198,6 @@ def add_movie(message):
         "✅ Kino saqlandi!",
         reply_markup=admin_buttons()
     )
-
 # =======================
 # 🔍 SEARCH
 # =======================
