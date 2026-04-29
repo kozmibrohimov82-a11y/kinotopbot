@@ -166,19 +166,7 @@ def process_delete(message):
 # =======================
 # 🎬 ADD MOVIE
 # =======================
-@bot.message_handler(func=lambda m: m.text == "➕ Kino qo'shish")
-def ask_movie(message):
-    if message.from_user.id not in ADMIN_ID:
-        return
-
-    user_state[message.from_user.id] = "waiting_movie"
-
-    bot.send_message(
-        message.chat.id,
-        "🎬 Kino yuboring\n📌 Format: kod nom"
-    )
-
-@bot.message_handler(content_types=['video'])
+@bot.message_handler(content_types=['video', 'document'])
 def add_movie(message):
     user_id = message.from_user.id
 
@@ -188,34 +176,36 @@ def add_movie(message):
     if user_state.get(user_id) != "waiting_movie":
         return
 
-    if not message.caption:
-        bot.send_message(message.chat.id, "❌ Caption yozing")
+    caption = message.caption
+
+    if not caption:
+        bot.send_message(message.chat.id, "❌ Caption yozing: kod nom")
         return
 
-    parts = message.caption.split(" ", 1)
+    parts = caption.split(" ", 1)
 
     if len(parts) < 2:
         bot.send_message(message.chat.id, "❌ Format: kod nom")
         return
 
+    file_id = None
+
+    if message.content_type == "video":
+        file_id = message.video.file_id
+    elif message.content_type == "document":
+        file_id = message.document.file_id
+
     code = parts[0].lower()
     name = parts[1]
-    success = db.add_movie(code, name, message.video.file_id)
 
+    success = db.add_movie(code, name, file_id)
+    
     user_state[user_id] = None
 
     if success:
-        bot.send_message(
-            message.chat.id,
-            "✅ Kino saqlandi!",
-            reply_markup=admin_buttons()
-        )
+        bot.send_message(message.chat.id, "✅ Kino saqlandi!", reply_markup=admin_buttons())
     else:
-        bot.send_message(
-            message.chat.id,
-            "❌ Bu kod allaqachon mavjud!",
-            reply_markup=admin_buttons()
-        )
+        bot.send_message(message.chat.id, "❌ Bu kod allaqachon mavjud!")
 # =======================
 # 🎬 BARCHA KINOLAR (FIXED)
 # =======================
