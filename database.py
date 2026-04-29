@@ -44,7 +44,7 @@ class Database:
         return self.cursor.fetchone()
 
     def get_all_movies(self):
-        self.cursor.execute("SELECT code, name FROM movies")
+        self.cursor.execute("SELECT * FROM movies")
         return self.cursor.fetchall()
 
     def delete_movie(self, code):
@@ -87,3 +87,5 @@ class Database:
             WHERE last_active >= datetime('now', ?)
         """, (f"-{minutes} minutes",))
         return self.cursor.fetchone()[0]
+    
+    

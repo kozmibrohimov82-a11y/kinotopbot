@@ -225,6 +225,24 @@ def search(message):
         if message.from_user.id not in ADMIN_ID:
             bot.reply_to(message, "❌ Topilmadi")
 
+
+
+
+@bot.message_handler(func=lambda m: m.text == "🎬 Barcha kinolar" and m.from_user.id in ADMIN_ID)
+def all_movies(message):
+    movies = db.get_all_movies()  # DB da shunaqa funksiya bo‘lishi kerak
+
+    if not movies:
+        bot.send_message(message.chat.id, "❌ Hech qanday kino yo‘q")
+        return
+
+    text = "🎬 Barcha kinolar:\n\n"
+
+    for movie in movies:
+        # movie = (code, name, file_id)
+        text += f"🎞 {movie[0]} - {movie[1]}\n"
+
+    bot.send_message(message.chat.id, text)
 # =======================
 # ▶️ RUN
 # =======================
