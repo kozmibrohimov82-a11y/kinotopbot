@@ -200,13 +200,22 @@ def add_movie(message):
 
     code = parts[0].lower()
     name = parts[1]
-
-    db.add_movie(code, name, message.video.file_id)
+    success = db.add_movie(code, name, message.video.file_id)
 
     user_state[user_id] = None
 
-    bot.send_message(message.chat.id, "✅ Saqlandi!", reply_markup=admin_buttons())
-
+    if success:
+        bot.send_message(
+            message.chat.id,
+            "✅ Kino saqlandi!",
+            reply_markup=admin_buttons()
+        )
+    else:
+        bot.send_message(
+            message.chat.id,
+            "❌ Bu kod allaqachon mavjud!",
+            reply_markup=admin_buttons()
+        )
 # =======================
 # 🎬 BARCHA KINOLAR (FIXED)
 # =======================

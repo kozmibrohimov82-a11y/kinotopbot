@@ -35,7 +35,8 @@ class Database:
                     "INSERT INTO movies VALUES (?, ?, ?)",
                     (code, name, file_id)
                 )
-                return True
+            return True
+
         except sqlite3.IntegrityError:
             return False
 
