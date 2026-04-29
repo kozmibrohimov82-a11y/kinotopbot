@@ -52,7 +52,7 @@ def start(message: Message):
     track_user(message)
 
     if message.from_user.id in ADMIN_ID:
-        bot.send_message(message.chat.id, "👋 Admin panel", reply_markup=admin_buttons())
+        bot.send_message(message.chat.id, "👋 Salom Admin ", reply_markup=admin_buttons())
     else:
         bot.send_message(message.chat.id, "🎬 Kino kodini yuboring", reply_markup=ReplyKeyboardRemove())
 
@@ -140,7 +140,6 @@ def process_delete(message):
 # =======================
 @bot.message_handler(func=lambda m: m.text == "➕ Kino qo'shish" and m.from_user.id in ADMIN_ID)
 def ask_movie(message):
-    user_state[message.from_user.id] = "waiting_movie"
 
     bot.send_message(
         message.chat.id,
