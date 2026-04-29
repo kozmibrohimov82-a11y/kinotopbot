@@ -210,7 +210,7 @@ def add_movie(message):
 # =======================
 # 🎬 BARCHA KINOLAR (FIXED)
 # =======================
-@bot.message_handler(func=lambda m: m.text == "🎬 Barcha kinolar")
+@bot.message_handler(func=lambda m: (m.text or "").strip() == "🎬 Barcha kinolar")
 def all_movies(message):
     if message.from_user.id not in ADMIN_ID:
         return
@@ -227,7 +227,6 @@ def all_movies(message):
         text += f"🎞 {m[0]} - {m[1]}\n"
 
     bot.send_message(message.chat.id, text)
-
 # =======================
 # 🔍 SEARCH (LAST PRIORITY!)
 # =======================
