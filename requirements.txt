@@ -1,2 +1,2 @@
-pyTelegramBotAPI 
-#TOKEN = "8560396008:AAFsT1MCeJbxqwqxK2kI7nQdm7GdjjMfHos"
+pyTelegramBotAPI==4.0.0
+requests==2.31.0
