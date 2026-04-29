@@ -1,7 +1,6 @@
 import telebot
 from telebot.types import (
-    Message, ReplyKeyboardMarkup, KeyboardButton,
-    ReplyKeyboardRemove, ForceReply
+    Message, ReplyKeyboardMarkup, ReplyKeyboardRemove, ForceReply
 )
 from database import Database
 
@@ -12,6 +11,11 @@ bot = telebot.TeleBot(TOKEN)
 db = Database("kinolar.db")
 
 CHANNELS = []
+
+# =======================
+# 🔥 STATE (ENG MUHIM FIX)
+# =======================
+user_state = {}
 
 # =======================
 # 👤 USER TRACKER
@@ -40,17 +44,6 @@ def admin_buttons():
     )
     return markup
 
-ADMIN_COMMANDS = [
-    "🎬 Barcha kinolar",
-    "➕ Kino qo'shish",
-    "🗑 Kinoni o'chirish",
-    "📢 Kanal qo'shish",
-    "📋 Kanallar ro'yxati",
-    "❌ Kanal o'chirish",
-    "📊 Statistika",
-    "📢 Reklama"
-]
-
 # =======================
 # 📢 START
 # =======================
@@ -70,7 +63,6 @@ def start(message: Message):
 def stats(message):
     total = db.get_users_count()
     active = db.get_active_users(1440)
-
     bot.send_message(message.chat.id, f"👥 Jami: {total}\n🔥 Aktiv (24h): {active}")
 
 # =======================
@@ -113,17 +105,7 @@ def save_channel(message):
     bot.send_message(message.chat.id, f"✅ Qo‘shildi: {username}", reply_markup=admin_buttons())
 
 # =======================
-# 📋 KANALLAR
-# =======================
-@bot.message_handler(func=lambda m: m.text == "📋 Kanallar ro'yxati" and m.from_user.id in ADMIN_ID)
-def show_channels(message):
-    if CHANNELS:
-        bot.send_message(message.chat.id, "\n".join(CHANNELS))
-    else:
-        bot.send_message(message.chat.id, "❌ Yo‘q")
-
-# =======================
-# ❌ DELETE CHANNEL
+# ❌ KANAL O‘CHIRISH
 # =======================
 @bot.message_handler(func=lambda m: m.text == "❌ Kanal o'chirish" and m.from_user.id in ADMIN_ID)
 def delete_channel(message):
@@ -140,7 +122,7 @@ def process_delete_channel(message):
         bot.send_message(message.chat.id, "❌ Yo‘q")
 
 # =======================
-# 🗑 DELETE MOVIE
+# 🗑 MOVIE DELETE
 # =======================
 @bot.message_handler(func=lambda m: m.text == "🗑 Kinoni o'chirish" and m.from_user.id in ADMIN_ID)
 def del_movie(message):
@@ -154,25 +136,52 @@ def process_delete(message):
         bot.send_message(message.chat.id, "❌ Yo'q")
 
 # =======================
-# 🎬 ADD MOVIE
+# 🎬 ➕ KINO QO‘SHISH (FIX QILINGAN)
 # =======================
+@bot.message_handler(func=lambda m: m.text == "➕ Kino qo'shish" and m.from_user.id in ADMIN_ID)
+def ask_movie(message):
+    user_state[message.from_user.id] = "waiting_movie"
+
+    bot.send_message(
+        message.chat.id,
+        "🎬 Salom!\n\n"
+        "📥 Kino videosini yuboring va captionga yozing:\n"
+        "👉 kod nomi\n\n"
+        "Misol: kino1 Titanic"
+    )
+
 @bot.message_handler(content_types=['video'])
 def add_movie(message):
-    if message.from_user.id not in ADMIN_ID:
+    user_id = message.from_user.id
+
+    if user_id not in ADMIN_ID:
+        return
+
+    if user_state.get(user_id) != "waiting_movie":
         return
 
     if not message.caption:
+        bot.send_message(message.chat.id, "❌ Caption yozing: kod nomi")
         return
 
     parts = message.caption.split(" ", 1)
+
     if len(parts) < 2:
+        bot.send_message(message.chat.id, "❌ Format: kod nomi")
         return
 
     code = parts[0].lower()
     name = parts[1]
 
     db.add_movie(code, name, message.video.file_id)
-    bot.send_message(message.chat.id, "✅ Saqlandi", reply_markup=admin_buttons())
+
+    user_state[user_id] = None
+
+    bot.send_message(
+        message.chat.id,
+        "✅ Kino saqlandi!",
+        reply_markup=admin_buttons()
+    )
 
 # =======================
 # 🔍 SEARCH
@@ -181,7 +190,16 @@ def add_movie(message):
 def search(message):
     track_user(message)
 
-    if message.from_user.id in ADMIN_ID and message.text in ADMIN_COMMANDS:
+    if message.from_user.id in ADMIN_ID and message.text in [
+        "🎬 Barcha kinolar",
+        "➕ Kino qo'shish",
+        "🗑 Kinoni o'chirish",
+        "📢 Kanal qo'shish",
+        "📋 Kanallar ro'yxati",
+        "❌ Kanal o'chirish",
+        "📊 Statistika",
+        "📢 Reklama"
+    ]:
         return
 
     movie = db.get_movie(message.text.strip().lower())
