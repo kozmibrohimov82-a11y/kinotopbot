@@ -320,7 +320,6 @@ def receive_movie(message: Message):
 # ══════════════════════════════════════════════════
 # ADMIN — 🎬 Barcha kinolar
 # ══════════════════════════════════════════════════
-
 @bot.message_handler(func=lambda m: (m.text or "").strip() == "🎬 Barcha kinolar")
 def all_movies(message: Message):
     if not is_admin(message):
@@ -331,18 +330,20 @@ def all_movies(message: Message):
         bot.send_message(message.chat.id, "❌ Hech qanday kino yo'q")
         return
 
-    # Split into chunks to avoid Telegram message size limit
     chunk = "🎬 <b>Barcha kinolar:</b>\n\n"
+
     for code, name in movies:
         line = f"🎞 <code>{code}</code> — {name}\n"
-        if len(chunk) + len(line) > 4000:
+
+        # agar limit oshsa yuboramiz
+        if len(chunk) + len(line) > 3800:
             bot.send_message(message.chat.id, chunk, parse_mode="HTML")
-            chunk = ""
+            chunk = "🎬 <b>Barcha kinolar (davomi):</b>\n\n"
+
         chunk += line
 
     if chunk:
         bot.send_message(message.chat.id, chunk, parse_mode="HTML")
-
 
 # ══════════════════════════════════════════════════
 # USER — kino qidirish (text handler, lowest priority)
