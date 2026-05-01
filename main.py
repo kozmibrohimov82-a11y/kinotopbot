@@ -267,8 +267,6 @@ def add_movie_start(message: Message):
         parse_mode="HTML",
         reply_markup=ForceReply(),
     )
-
-
 @bot.message_handler(content_types=["video", "document"])
 def receive_movie(message: Message):
     user_id = message.from_user.id
@@ -281,14 +279,21 @@ def receive_movie(message: Message):
 
     caption = (message.caption or "").strip()
 
+    # ❌ Caption yo'q
     if not caption:
-        bot.send_message(message.chat.id, "❌ Caption yozing: <code>kod Kino nomi</code>", parse_mode="HTML")
-        return
+        return reset_to_menu(
+            message,
+            "❌ Caption yozilmadi!\nQaytadan urinib ko‘ring."
+        )
 
     parts = caption.split(" ", 1)
+
+    # ❌ Format noto‘g‘ri
     if len(parts) < 2:
-        bot.send_message(message.chat.id, "❌ Format noto'g'ri: <code>kod Kino nomi</code>", parse_mode="HTML")
-        return
+        return reset_to_menu(
+            message,
+            "❌ Format noto‘g‘ri!\n\nTo‘g‘risi: <code>kod Kino nomi</code>"
+        )
 
     code = parts[0].lower()
     name = parts[1]
@@ -315,7 +320,6 @@ def receive_movie(message: Message):
             parse_mode="HTML",
             reply_markup=admin_markup(),
         )
-
 
 # ══════════════════════════════════════════════════
 # ADMIN — 🎬 Barcha kinolar
