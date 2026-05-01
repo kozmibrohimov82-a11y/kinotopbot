@@ -30,7 +30,16 @@ ADMIN_BUTTONS = [
     "📊 Statistika",
     "📢 Reklama",
 ]
+def reset_to_menu(message: Message, text: str):
+    user_id = message.from_user.id
+    user_state[user_id] = None
 
+    bot.send_message(
+        message.chat.id,
+        text,
+        parse_mode="HTML",
+        reply_markup=admin_markup(),
+    )
 
 # ══════════════════════════════════════════════════
 # HELPERS
@@ -283,7 +292,7 @@ def receive_movie(message: Message):
     if not caption:
         return reset_to_menu(
             message,
-            "❌ Caption yozilmadi!\nQaytadan urinib ko‘ring."
+            "❌ Caption yozilmadi!\nQaytadan urinib ko'ring."
         )
 
     parts = caption.split(" ", 1)
@@ -292,7 +301,7 @@ def receive_movie(message: Message):
     if len(parts) < 2:
         return reset_to_menu(
             message,
-            "❌ Format noto‘g‘ri!\n\nTo‘g‘risi: <code>kod Kino nomi</code>"
+            "❌ Format noto'g'ri!\n\nTo'g'risi: <code>kod Kino nomi</code>"
         )
 
     code = parts[0].lower()
@@ -320,6 +329,11 @@ def receive_movie(message: Message):
             parse_mode="HTML",
             reply_markup=admin_markup(),
         )
+
+@bot.message_handler(func=lambda m: user_state.get(m.from_user.id) == "waiting_movie", content_types=["text", "photo", "audio", "sticker"])
+def wrong_input(message: Message):
+    reset_to_menu(message, "❌ Faqat video yoki hujjat yuboring!")
+
 
 # ══════════════════════════════════════════════════
 # ADMIN — 🎬 Barcha kinolar
