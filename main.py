@@ -138,12 +138,15 @@ def stats(message: Message):
         return
     total = db.get_users_count()
     active = db.get_active_users(1440)
-    bot.send_message(
-        message.chat.id,
-        f"👥 Jami foydalanuvchilar: <b>{total}</b>\n"
-        f"🔥 So'nggi 24 soatda aktiv: <b>{active}</b>",
-        parse_mode="HTML",
+    try:
+        bot.send_message(
+            message.chat.id,
+            f"👥 Jami foydalanuvchilar: <b>{total}</b>\n"
+            f"🔥 So'nggi 24 soatda aktiv: <b>{active}</b>",
+            parse_mode="HTML",
     )
+    except Exception as e:
+        print("Send error:", e)
 
 
 # ══════════════════════════════════════════════════
@@ -409,4 +412,12 @@ def search(message: Message):
 
 if __name__ == "__main__":
     print("🤖 Bot ishga tushdi...")
-    bot.infinity_polling()
+    import time
+
+    while True:
+        try:
+            bot.remove_webhook()
+            bot.infinity_polling(skip_pending=True, timeout=60, long_polling_timeout=60)
+        except Exception as e:
+            print("Xatolik:", e)
+            time.sleep(5)
