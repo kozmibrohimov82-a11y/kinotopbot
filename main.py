@@ -341,6 +341,8 @@ def wrong_input(message: Message):
 # ══════════════════════════════════════════════════
 # ADMIN — 🎬 Barcha kinolar
 # ══════════════════════════════════════════════════
+import time
+
 @bot.message_handler(func=lambda m: (m.text or "").strip() == "🎬 Barcha kinolar")
 def all_movies(message: Message):
     if not is_admin(message):
@@ -356,16 +358,22 @@ def all_movies(message: Message):
     for code, name in movies:
         line = f"🎞 <code>{code}</code> — {name}\n"
 
-        # agar limit oshsa yuboramiz
         if len(chunk) + len(line) > 3800:
-            bot.send_message(message.chat.id, chunk, parse_mode="HTML")
+            try:
+                bot.send_message(message.chat.id, chunk, parse_mode="HTML")
+                time.sleep(0.3)  # 🔥 MUHIM stabilizatsiya
+            except Exception as e:
+                print("Send error:", e)
+
             chunk = "🎬 <b>Barcha kinolar (davomi):</b>\n\n"
 
         chunk += line
 
     if chunk:
-        bot.send_message(message.chat.id, chunk, parse_mode="HTML")
-
+        try:
+            bot.send_message(message.chat.id, chunk, parse_mode="HTML")
+        except Exception as e:
+            print("Final send error:", e)
 # ══════════════════════════════════════════════════
 # USER — kino qidirish (text handler, lowest priority)
 # ══════════════════════════════════════════════════
